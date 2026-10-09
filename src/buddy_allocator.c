@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "buddy_allocator.h"
+#include "bit_map.h"
 
 // these are trivial helpers to support you in case you want
 // to do a bitmap implementation
@@ -22,10 +23,9 @@ int startIdx(int idx) { return (idx - (1 << levelIdx(idx))); }
 
 // computes the size in bytes for the allocator
 int BuddyAllocator_calcSize(int num_levels) {
-  int list_items = 1 << (num_levels + 1); // maximum number of allocations, used
-                                          // to determine the max list items
-  int list_alloc_size = (sizeof(BuddyListItem) + sizeof(int)) * list_items;
-  return list_alloc_size;
+  //num_nodi = (2^(num_levels+1) -1)
+  int total_nodes = (1 << (num_levels+1)) - 1;
+  return BitMap_getBytes(total_nodes);
 }
 
 // creates an item from the index
