@@ -1,29 +1,23 @@
 #pragma once
-#include "pool_allocator.h"
-#include "linked_list.h"
 
 #define MAX_LEVELS 16
 
-// one entry of the buddy list
-typedef struct BuddyListItem {
-  ListItem list;
-  int idx;   // tree index
-  int level; // level for the buddy
-  char* start; // start of memory
-  int size;
-  struct BuddyListItem* buddy_ptr;
-  struct BuddyListItem* parent_ptr;
-} BuddyListItem;
-
+#include "bit_map.h"
 
 typedef struct  {
-  ListHead free[MAX_LEVELS];
-  int num_levels;
-  PoolAllocator list_allocator;
-  char* memory; // the memory area to be managed
-  int min_bucket_size; // the minimum page of RAM that can be returned
+  BitMap bitmap; //mappa dei bit liberi / occupati
+  int num_levels; //numero livelli albero
+  char* memory; // memoria da gestire (puntatore a inizio memoria)
+  size_t min_bucket_size; // dimensione minima blocco ritornabile
+  size_t memory_size;
 } BuddyAllocator;
 
+/*rispetto al codice del corso ho eliminato tutti i riferimenti 
+alle strutture liste e al all'allocatore che serviva per queste strutture
+infatti afesso non viene più creata una lista per ogni livello dell'albero
+ma i blocchi liberi o no verrrano memorizzati tramite BitMap e ricercati
+ tramite  aritmetica dell'albero
+*/
 
 // computes the size in bytes for the buffer of the allocator
 int BuddyAllocator_calcSize(int num_levels);
@@ -31,24 +25,12 @@ int BuddyAllocator_calcSize(int num_levels);
 
 // initializes the buddy allocator, and checks that the buffer is large enough
 void BuddyAllocator_init(BuddyAllocator* alloc,
-                         int num_levels,
-                         char* buffer,
-                         int buffer_size,
-                         char* memory,
-                         int min_bucket_size);
-
-// returns (allocates) a buddy at a given level.
-// side effect on the internal structures
-// 0 id no memory available
-BuddyListItem* BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level);
-
-
-// releases an allocated buddy, performing the necessary joins
-// side effect on the internal structures
-void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, BuddyListItem* item);
+                        int num_levels,
+                        size_t memory_size, 
+                        char* memory);
 
 //allocates memory
-void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size);
+void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size);
 
 //releases allocated memory
 void BuddyAllocator_free(BuddyAllocator* alloc, void* mem);
