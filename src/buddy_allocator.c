@@ -28,19 +28,37 @@ int BuddyAllocator_calcSize(int num_levels) {
   return BitMap_getBytes(total_nodes);
 }
 
-void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size, char* memory);
+void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size, char* memory){
   assert(num_levels <= MAX_LEVELS && "Numero di livelli non valido");
 
   int total_nodes = (1 << (num_levels+1)) - 1;
   size_t bitmap_bytes = BitMap_getBytes(total_nodes);
-  
+
   BitMap_init(&alloc->bitmap, total_nodes, uint8_t* memory);
 
   memset(memory, 0, bitmap_bytes)
 
-};
+  alloc->num_levels = num_levels + 1;
+  alloc->memory = memory + bitmap_bytes;
+  alloc->memory_size = memory_size - bitmap_bytes;
 
+  alloc->min_bucket_size = alloc->memory_size >> num_levels;
 
+  #ifdef _VERBOSE_
+    printf("BUDDY ALLOCATOR INIZIALIZZATO\n");
+    printf(" |- Livelli:             %d\n", num_levels);
+    printf(" |- Nodi totali:         %d\n", total_nodes);
+    printf(" |- Dimensione bitmap:   %zu byte (all'inizio del buffer)\n", bitmap_bytes);
+    printf(" |- Memoria utente:      %zu byte (all'indirizzo %p)\n", alloc->memory_size, (void*)alloc->memory);
+    printf(" |- Min bucket size:     %zu byte\n", alloc->min_bucket_size);
+  #endif
+}
+
+void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
+  
+}
+
+/*
 
 // ----------------------------------------------------------------------- //
 // ----------------------------------------------------------------------- //
@@ -231,3 +249,4 @@ void BuddyAllocator_free(BuddyAllocator *alloc, void *mem) {
   assert(buddy->start == p);
   BuddyAllocator_releaseBuddy(alloc, buddy);
 }
+*/ 
