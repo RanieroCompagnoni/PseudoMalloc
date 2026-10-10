@@ -36,11 +36,14 @@ void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size
 
   BitMap_init(&alloc->bitmap, total_nodes, uint8_t* memory);
 
-  memset(memory, 0, bitmap_bytes)
+  //azzero tutti i nodi della bitmap (tutti liberi)
+  for (int i = 1; i <= total_nodes; ++i) {
+    BitMap_setBit(&alloc->bitmap, i, 0);
+  }
 
   alloc->num_levels = num_levels + 1;
   alloc->memory = memory + bitmap_bytes;
-  alloc->memory_size = memory_size - bitmap_bytes;
+  alloc->memory_size = memory_size;
 
   alloc->min_bucket_size = alloc->memory_size >> num_levels;
 
@@ -55,7 +58,7 @@ void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size
 }
 
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
-  
+
 }
 
 /*
