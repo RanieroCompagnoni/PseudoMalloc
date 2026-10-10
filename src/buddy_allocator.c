@@ -58,7 +58,62 @@ void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size
 }
 
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
+  if(size==0 || size>alloc->memory_size){
+    printf("Dimensione non allocabile");
+    return NULL;
+  }
 
+  //logaritmo livello massimo - log arrotondato per eccesso di grandezza necessaria
+  int target_level = (int)log2(alloc->memory_size) - (int)ceil(log2(size));
+
+  int current_level = 0;
+  int current_node = 1;
+  int free_idx = -1;
+
+  while(current_level<=target_level){
+
+      if(BitMap_bit(&alloc->bitmap,current_node) == 0){ //blocco libero
+        if(current_level==target_level){     //se sono al livello giusto
+          free_idx = current_node;    //salvo l'indice
+          break;
+        }else{ //il blocco era libero ma non era al livello giusto (troppo grande), allora splitto
+          BitMap_setBit(&alloc->bitmap, current_node, 1); //segno come allocato
+          current_node = current_node * 2;
+          current_level++;
+        }
+      }else{  //blocco occupato o gia splittato
+        int allocated_flag = 0;
+        if(current_level == alloc->num_levels-1){ //siamo alle foglie allora devono essere sicuramente allocate
+          allocated_flag=1;
+        }else{ //se un nodo ha 1 sulla bitmap e entrambi i figli sono a 0 significa che è allocato 
+          int left_child = current_node * 2;
+          int right_child = current_node * 2 + 1;
+          if (BitMap_bit(&alloc->bitmap, left_child) == 0 && BitMap_bit(&alloc->bitmap, right_child) == 0) {
+              allocated_flag = 1;
+          }
+        }
+        if(allocated_flag==0 && current_level<target_level){ // allora il blocco ha 1 sulla bitmap ma è solo splittato non completamente allocato nel suo sottoalbero ci sarà un blocco libero
+          current_node = current_node * 2;
+          current_level++;
+        }else{
+          if(current_node % 2 != 0 || current_node == 1){  
+                while((current_node % 2 != 0) && current_node > 1) {
+                  current_node = current_node / 2;
+                  current_level--;
+                }
+
+                if(current_node == 1) break;
+        }
+        current_node++;
+    }
+  }
+  if(free_idx==-1) {
+    printf("Memoria non sufficiente\n");
+    return NULL;
+  }
+
+  BitMap_setBit(&alloc->bitmap, free_idx, 1);
+  return NULL;
 }
 
 /*
