@@ -25,7 +25,7 @@ int startIdx(int idx) { return (idx - (1 << levelIdx(idx))); }
 int BuddyAllocator_calcSize(int num_levels) {
   //num_nodi = (2^(num_levels+1) -1)
   int total_nodes = (1 << (num_levels+1)) - 1;
-  return BitMap_getBytes(total_nodes);
+  return BitMap_getBytes(total_nodes + 1);
 }
 
 void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size, char* memory){
@@ -106,9 +106,9 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
                   current_level--;
                 }
                 if(current_node == 1) break;
+                current_node++;
           }
         }
-        current_node++;
     }
   }
   if(free_idx==-1) {
@@ -132,7 +132,7 @@ void BuddyAllocator_free(BuddyAllocator *alloc, void *mem){
 #endif
   if (!mem) {
     printf("BuddyAllocator_free|WARINING, cannot free this memory address\n");
-    /* return; */
+    return; 
   }
 
   char* char_mem = (char*)mem;
