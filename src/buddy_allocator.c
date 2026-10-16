@@ -25,7 +25,7 @@ int startIdx(int idx) { return (idx - (1 << levelIdx(idx))); }
 int BuddyAllocator_calcSize(int num_levels) {
   //num_nodi = (2^(num_levels+1) -1)
   int total_nodes = (1 << (num_levels+1)) - 1;
-  return BitMap_getBytes(total_nodes + 1);
+  return BitMap_getBytes(total_nodes);
 }
 
 void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size, char* memory){
@@ -43,7 +43,7 @@ void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size
 
   alloc->num_levels = num_levels;
   alloc->memory = memory + bitmap_bytes;
-  alloc->memory_size = memory_size;
+  alloc->memory_size = memory_size - bitmap_bytes;
 
   alloc->min_bucket_size = alloc->memory_size >> num_levels;
 
@@ -65,8 +65,10 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
 
   int real_size = size + sizeof(int);
 
-  //logaritmo livello massimo - log arrotondato per eccesso di grandezza necessaria
-  int target_level = (int)log2(alloc->memory_size) - (int)ceil(log2(real_size));
+  int target_level = alloc->num_levels;
+  while (target_level > 0 && (alloc->memory_size >> target_level) < real_size) {
+      target_level--;
+  }
 
   if (target_level > alloc->num_levels) target_level = alloc->num_levels;
 
