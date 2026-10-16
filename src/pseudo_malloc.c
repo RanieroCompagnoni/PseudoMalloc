@@ -34,14 +34,16 @@ void* pseudomalloc(size_t size) {
 
     //richesta grande --> direttamente con mmap
 
-    char* ptr = (char*)mmap(NULL, size ,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    size_t total_size = size + sizeof(size_t);
+    char* ptr = (char*)mmap(NULL, total_size ,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     if (ptr == MAP_FAILED) {
         printf("Allocazione con mmap fallita\n");
         return NULL;
     }
 
-    return (void*) ptr;
+    *((size_t*)ptr) = total_size;
+    return (void*)(ptr + sizeof(size_t));;
 }
 void pseudofree(void* ptr){
     if(ptr==NULL){
