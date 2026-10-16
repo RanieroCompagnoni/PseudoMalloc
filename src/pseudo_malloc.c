@@ -5,6 +5,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "sys/mman.h"
 
 #define PAGE_SIZE 4096
 #define TOTAL_SIZE 1024*1024 //1MB
@@ -17,9 +18,9 @@ void pseudomalloc_init(void) {
     if (memory_pool != NULL) {
         return;
     }
-    memory_pool = (char*)mmap(NULL,TOTAL_SIZE,PROT_READ | PROT_WRITE, -1, 0);
+    memory_pool = (char*)mmap(NULL,TOTAL_SIZE,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     
-    BuddyAllocator_init(&alloc, NUM_LEVELS, TOTAL_SIZE, memory_pool)
+    BuddyAllocator_init(&alloc, NUM_LEVELS, TOTAL_SIZE, memory_pool);
 }
 void* pseudomalloc(size_t size) {
     if(size<=0){
@@ -33,7 +34,7 @@ void* pseudomalloc(size_t size) {
 
     //richesta grande --> direttamente con mmap
 
-    char* ptr = (char*)mmap(NULL, total_size,PROT_READ | PROT_WRITE, -1, 0);
+    char* ptr = (char*)mmap(NULL, size ,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     if (ptr == MAP_FAILED) {
         printf("Allocazione con mmap fallita\n");
@@ -52,6 +53,6 @@ void pseudofree(void* ptr){
         BuddyAllocator_free(&alloc, ptr);
     }else{//zona grande gestita con mmap
         size_t size_ptr = *(size_t*)ptr;
-        munmap((char*)ptr, size_ptr)
+        munmap((char*)ptr, size_ptr);
     }
 }
