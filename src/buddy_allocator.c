@@ -42,7 +42,9 @@ void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size
   }
 
   alloc->num_levels = num_levels;
+  //memoria totalia (albero + bitmap)
   alloc->memory = memory + bitmap_bytes;
+  //memoria per albero (esattamente una potenza di 2)
   alloc->memory_size = memory_size - bitmap_bytes;
 
   alloc->min_bucket_size = alloc->memory_size >> num_levels;
@@ -57,68 +59,74 @@ void BuddyAllocator_init(BuddyAllocator* alloc,int num_levels,size_t memory_size
   #endif
 }
 
+int find_free_node(BuddyAllocator* alloc, int node, int current_level, int target_level) {
+  //caso base -> livello giusto trovato
+  if(current_level == target_level){
+    if(BitMap_bit(&alloc->bitmap, node) == 0){
+      return node;
+    }
+    return -1;
+  }
+
+  //caso nodo padre == 0 -> è completamente libero (cosi come tutti i suoi figli)
+  if(BitMap_bit(&alloc->bitmap, node) == 0){
+    while(current_level<target_level){
+      node = node * 2;
+      current_level++;
+    }
+    return node;
+  }
+
+  //caso nodo padre == 1 -> o è tutto pieno o è stata gia splittato
+  int left_child = node * 2;
+  int right_child = node * 2 + 1;
+
+  //i figli sono entrambi a 0 , il padre era completamente allocato
+  if(BitMap_bit(&alloc->bitmap, left_child) == 0 && BitMap_bit(&alloc->bitmap, right_child==0)){
+    return -1;
+  }
+
+  //era solo splittato , si cerca ricorsivamente partendo dal sottoalbero sx
+  int found = find_free_node(alloc, left_child, current_level + 1, target_level);
+  if (found != -1){
+    return found;
+  }
+  //albero destro
+  return find_free_node(alloc, right_child, current_level + 1, target_level);
+}
+
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
   if(size==0 || size>alloc->memory_size){
     printf("Dimensione non allocabile");
     return NULL;
   }
 
+  //aggiungo spazio per un header , mi servirà per la free e per ritrovare il nodo nella bitmap
   int real_size = size + sizeof(int);
 
+  /*partendo dalle foglie e risalendo cerco il livello con 
+  blocchi sufficientementi grandi per allocare real size*/ 
   int target_level = alloc->num_levels;
-  while (target_level > 0 && (alloc->memory_size >> target_level) < real_size) {
+  while (target_level > 0 && (alloc->memory_size >> target_level) < real_size){
       target_level--;
   }
 
   if (target_level > alloc->num_levels) target_level = alloc->num_levels;
 
-  int current_level = 0;
-  int current_node = 1;
-  int free_idx = -1;
-
-  while(current_level>=0 && current_level<=target_level){
-
-      if(BitMap_bit(&alloc->bitmap,current_node) == 0){ //blocco libero
-        if(current_level==target_level){     //se sono al livello giusto
-          free_idx = current_node;    //salvo l'indice
-          break;
-        }else{ //il blocco era libero ma non era al livello giusto (troppo grande), allora splitto
-          BitMap_setBit(&alloc->bitmap, current_node, 1); //segno come allocato
-          current_node = current_node * 2;
-          current_level++;
-        }
-      }else{  //blocco occupato o gia splittato
-        int allocated_flag = 0;
-        if(current_level == alloc->num_levels){ //siamo alle foglie allora devono essere sicuramente allocate
-          allocated_flag=1;
-        }else{ //se un nodo ha 1 sulla bitmap e entrambi i figli sono a 0 significa che è allocato 
-          int left_child = current_node * 2;
-          int right_child = current_node * 2 + 1;
-          if (BitMap_bit(&alloc->bitmap, left_child) == 0 && BitMap_bit(&alloc->bitmap, right_child) == 0) {
-              allocated_flag = 1;
-          }
-        }
-        if(allocated_flag==0 && current_level<target_level){ // allora il blocco ha 1 sulla bitmap ma è solo splittato non completamente allocato, nel suo sottoalbero ci sarà un blocco libero
-          current_node = current_node * 2;
-          current_level++;
-        }else{
-          if(current_node % 2 != 0 || current_node == 1){  
-                while((current_node % 2 != 0) && current_node > 1) {
-                  current_node = current_node / 2;
-                  current_level--;
-                }
-                if(current_node == 1) break;
-                current_node++;
-          }
-        }
-    }
-  }
-  if(free_idx==-1) {
-    printf("Memoria non sufficiente\n");
+  int free_idx = find_free_node(alloc,1,0,target_level);
+  if (free_idx == -1){
+    printf("Memoria Insufficiente");
     return NULL;
   }
 
-  BitMap_setBit(&alloc->bitmap, free_idx, 1);
+  //settiamo a 1 il nodo scelto e tutti i suoi antenati sulla bitmap
+  int current_idx = free_idx;
+  while(current_idx >=1){
+    BitMap_setBit(&alloc->bitmap, current_idx, 1);
+    current_idx = parentIdx(current_idx);
+  }
+
+
   int level = levelIdx(free_idx);
   int offset = startIdx(free_idx);
   size_t bucket_size = alloc->memory_size >> level;
