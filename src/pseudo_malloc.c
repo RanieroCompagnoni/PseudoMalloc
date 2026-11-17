@@ -18,10 +18,14 @@ void pseudomalloc_init(void) {
     if (memory_pool != NULL) {
         return;
     }
-    memory_pool = (char*)mmap(NULL,TOTAL_SIZE,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+    int total_nodes = (1 << (num_levels+1)) - 1;
+    size_t bitmap_bytes = BitMap_getBytes(total_nodes + 1);
+    memory_pool = (char*)mmap(NULL,TOTAL_SIZE + bitmap_bytes ,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     
     BuddyAllocator_init(&alloc, NUM_LEVELS, TOTAL_SIZE, memory_pool);
 }
+
 void* pseudomalloc(size_t size) {
     if(size<=0){
         printf("Dimensione non valida\n");
@@ -54,6 +58,7 @@ void pseudofree(void* ptr){
     if((char*)ptr>=memory_pool && (char*)ptr<(memory_pool+TOTAL_SIZE)){
         BuddyAllocator_free(&alloc, ptr);
     }else{//zona grande gestita con mmap
+        char* real_ptr = (char*)ptr - sizeof(size_t);
         size_t size_ptr = *(size_t*)ptr;
         munmap((char*)ptr, size_ptr);
     }
