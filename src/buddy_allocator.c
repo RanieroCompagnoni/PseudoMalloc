@@ -153,7 +153,7 @@ void BuddyAllocator_free(BuddyAllocator *alloc, void *mem){
 
   while (idx > 1) { 
     int buddy = buddyIdx(idx);
-
+    //se anche il buddy è a 0 , li fondo (mettendo a 0 il padre)
     if (BitMap_bit(&alloc->bitmap, buddy) == 0) {
         int p = parentIdx(idx);
         BitMap_setBit(&alloc->bitmap, p, 0);

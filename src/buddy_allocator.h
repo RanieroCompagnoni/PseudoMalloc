@@ -29,6 +29,9 @@ void BuddyAllocator_init(BuddyAllocator* alloc,
                         size_t memory_size, 
                         char* memory);
 
+//aux function for malloc
+int find_free_node(BuddyAllocator* alloc, int node, int current_level, int target_level);
+
 //allocates memory
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size);
 
