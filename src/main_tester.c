@@ -2,6 +2,7 @@
 #include <string.h>
 #include "pseudo_malloc.h"
 
+#define MAX_NUMBER_NODES 512
 int main(void) {
     printf("=== TESTER PSEUDOMALLOC ===\n");
 
@@ -18,13 +19,13 @@ int main(void) {
     //test 1023 byte -> BuddyAllocator
     char * p1 = (char*)pseudomalloc(1023);
     if(p1==NULL){
-        printf("Errore di Allocazione per 1023 byte; buddy = %c",p1);
+        printf("Errore di Allocazione per 1023 byte; buddy = %c\n",p1);
         return 1;
     }
     char * p2 = (char*)pseudomalloc(1023);
     //test 1024 byte -> mmap
     if(p2==NULL){
-        printf("Errore di Allocazione per 1024 byte; mmap = %c",p2);
+        printf("Errore di Allocazione per 1024 byte; mmap = %c\n",p2);
         return 1;
     }
 
@@ -34,6 +35,25 @@ int main(void) {
     pseudofree(p2);
     printf("Allocati 0, 1023 e 1024 byte correttamente\n\n");
 
+    //test allocazione albero completo con buddy (1MB e 8 livelli -> 2^8 = 256 nodi)
+    void* nodi[MAX_NUMBER_NODES];
+    for(int i=0; i<256; i++){
+        nodi[i] = pseudomalloc(500); //richiesta piccola entra in una singola foglia -> buddy
+        if(nodi[i]==NULL){
+            printf("Allocazione singola foglia fallita all'indice: %d\n\n",i);
+            return 1;
+        }
+        memset(nodi[i],i,500);
+    }
+    printf("Allocati 256 blocchi correttamente\n");
+
+    //ora l'albero è completamente pieno qualsiasi altro allocazione è impossibile
+    void* overflow = pseudomalloc(100);
+    if (overflow != NULL) {
+        printf("Errore l'albero non era stato completamente allocato\n\n");
+        return 1;
+    }
+    
     printf("\n=====Richiesta 100 byte (buddy_allocator)=====\n");
     p1 = (char*)pseudomalloc(100);
     if (p1) {
