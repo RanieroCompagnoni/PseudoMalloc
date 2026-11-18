@@ -53,6 +53,22 @@ int main(void) {
         printf("Errore l'albero non era stato completamente allocato\n\n");
         return 1;
     }
+
+    //test per vedere se ci sono stati errori di ripetizione nell'allocazione 
+    for(int i=0; i<256; i++){
+        for(int j=0; j<500; j++){
+            if(nodi[j] != i){
+                printf("Errore , node[%d]=%d invece che %d",j,nodi[j],i);
+                return 1;
+            }
+        }
+    }
+
+    //free tutti i nodi
+    for(int i=0; i<256; i++){
+        pseudofree(nodi[i]);
+    }
+
     
     printf("\n=====Richiesta 100 byte (buddy_allocator)=====\n");
     p1 = (char*)pseudomalloc(100);
