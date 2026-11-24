@@ -27,7 +27,7 @@ void pseudomalloc_init(void) {
 }
 
 void* pseudomalloc(size_t size) {
-    if(size<=0){
+    if(size<0){
         printf("Dimensione non valida\n");
         return NULL;
     }
