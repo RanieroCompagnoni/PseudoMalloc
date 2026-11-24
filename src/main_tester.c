@@ -98,7 +98,7 @@ int main(void) {
         if(i%2==0){
             sz = 256;
         }else{
-            sz = 4096 * (i+1);
+            sz = 4096;
         }
 
         mixed[i]=pseudomalloc(sz);
