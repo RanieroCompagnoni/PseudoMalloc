@@ -13,13 +13,13 @@ int main(void) {
     //test 1023 byte -> BuddyAllocator
     char * p1 = (char*)pseudomalloc(1023);
     if(p1==NULL){
-        printf("Errore di Allocazione per 1023 byte; buddy = %c\n",p1);
+        printf("Errore di Allocazione per 1023 byte; buddy = %p\n",(void*)p1);
         return 1;
     }
     char * p2 = (char*)pseudomalloc(1023);
     //test 1024 byte -> mmap
     if(p2==NULL){
-        printf("Errore di Allocazione per 1024 byte; mmap = %c\n",p2);
+        printf("Errore di Allocazione per 1024 byte; mmap = %p\n",(void*)p2);
         return 1;
     }
 
@@ -50,9 +50,11 @@ int main(void) {
 
     //test per vedere se ci sono stati errori di ripetizione nell'allocazione 
     for(int i=0; i<256; i++){
+        unsigned char expected = (unsigned char) i;
         for(int j=0; j<500; j++){
-            if(nodi[i][j] != i){
-                printf("Errore , node[%d]=%d invece che %d",j,nodi[j],i);
+            unsigned char actual = (unsigned char) nodi[i][j];
+            if(actual != expected){
+                printf("Errore , node %d byte %d = %u invece che %u\n",i,j, (unsigned int)actual, (unsigned int)expected);
                 return 1;
             }
         }
