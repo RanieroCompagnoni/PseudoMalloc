@@ -19,7 +19,7 @@ void pseudomalloc_init(void) {
         return;
     }
 
-    int total_nodes = (1 << (num_levels+1)) - 1;
+    int total_nodes = (1 << (NUM_LEVELS+1)) - 1;
     size_t bitmap_bytes = BitMap_getBytes(total_nodes + 1);
     memory_pool = (char*)mmap(NULL,TOTAL_SIZE + bitmap_bytes ,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     
