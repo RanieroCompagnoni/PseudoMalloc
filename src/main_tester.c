@@ -40,7 +40,7 @@ int main(void) {
         memset(nodi[i],i,500);
         //stampa di alcuni nodi per verifica 
         if(i==0 || i==1 || i==128 || i==255) {
-            printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[255] : %u | byte[499] : %u\n",i,(void*)nodi[i][0],(unsigned char)nodi[i][255],(unsigned char)nodi[i][499]);
+            printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[255] : %u | byte[499] : %u\n",i,(void*)nodi[i],(unsigned char)nodi[i][0],(unsigned char)nodi[i][255],(unsigned char)nodi[i][499]);
         }
     }
     printf("Allocati 256 blocchi correttamente\n");
