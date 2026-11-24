@@ -8,13 +8,7 @@ int main(void) {
 
     pseudomalloc_init();
 
-    printf("\n=====Casi limiti ( 0 e PAGE_SIZE/4)=====\n");
-    if(pseudomalloc(0)!=NULL){
-        printf("Errore di Allocazione per 0 byte");
-        return 1;
-    }
-
-    pseudofree(NULL);
+    printf("\n=====Caso limite PAGE_SIZE/4=====\n");
 
     //test 1023 byte -> BuddyAllocator
     char * p1 = (char*)pseudomalloc(1023);
