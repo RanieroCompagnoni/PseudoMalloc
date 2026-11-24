@@ -80,7 +80,7 @@ int main(void) {
     }
 
     printf("\n=====Richiesta 5000 byte (mmap)=====\n");
-    char* p2 = (char*)pseudomalloc(5000);
+    p2 = (char*)pseudomalloc(5000);
     if (p2) {
         strcpy(p2, "Allocato con mmap");
         printf(" -> Allocato a %p | Contenuto: %s\n", (void*)p2, p2);
@@ -88,7 +88,27 @@ int main(void) {
         printf(" -> Allocazione Fallita\n");
     }
 
-    // Test 3: Rilascio della memoria
+    void * mixed[50];
+
+    for(int i=0; i < 50; i++){
+        size_t sz;
+        if(i%2==0){
+            sz = 256;
+        }else{
+            sz = 4096 * (i+1);
+        }
+
+        mixed[i]=pseudomalloc(sz);
+        if(mixed[i]==NULL){
+            printf("Errore nell'allocazione mista , all'indice %d con size = %zu\n\n",i,sz);
+        }
+        memset(mixed[i],i,sz);
+    }
+
+    for(int i=0; i< 50; i++){
+        pseudofree(mixed[i]);
+    }
+
     printf("\n=====Deallocazione memorie=====\n");
     pseudofree(p1);
     printf(" -> p1 liberato.\n");
