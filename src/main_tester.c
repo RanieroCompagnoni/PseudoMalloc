@@ -51,13 +51,8 @@ int main(void) {
     //test per vedere se ci sono stati errori di ripetizione nell'allocazione 
     for(int i=0; i<256; i++){
         for(int j=0; j<500; j++){
-<<<<<<< HEAD
-            if(nodi[j] != i){
-                printf("Errore , node[%d]=%d invece che %d\n",j,nodi[j],i);
-=======
             if(nodi[i][j] != i){
                 printf("Errore , node[%d]=%d invece che %d",j,nodi[j],i);
->>>>>>> 6ce73c43992d6add6e1b23b1721c8a074368b1ef
                 return 1;
             }
         }
