@@ -88,6 +88,9 @@ int main(void) {
         printf(" -> Allocazione Fallita\n");
     }
 
+    pseudofree(p1);
+    pseudofree(p2);
+    
     void * mixed[50];
 
     for(int i=0; i < 50; i++){
