@@ -97,7 +97,7 @@ int find_free_node(BuddyAllocator* alloc, int node, int current_level, int targe
 
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
   if(size==0 || size>alloc->memory_size){
-    printf("Dimensione non allocabile");
+    printf("Dimensione non allocabile\n");
     return NULL;
   }
 
@@ -115,7 +115,7 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, size_t size){
 
   int free_idx = find_free_node(alloc,1,0,target_level);
   if (free_idx == -1){
-    printf("Memoria Insufficiente");
+    printf("Memoria Insufficiente\n");
     return NULL;
   }
 

@@ -27,7 +27,7 @@ int main(void) {
     memset(p2,2, 1024);
     pseudofree(p1);
     pseudofree(p2);
-    printf("Allocati 0, 1023 e 1024 byte correttamente\n\n");
+    printf("Allocati 1023 e 1024 byte correttamente\n\n");
 
     //test allocazione albero completo con buddy (1MB e 8 livelli -> 2^8 = 256 nodi)
     void* nodi[MAX_NUMBER_NODES];
@@ -52,7 +52,7 @@ int main(void) {
     for(int i=0; i<256; i++){
         for(int j=0; j<500; j++){
             if(nodi[j] != i){
-                printf("Errore , node[%d]=%d invece che %d",j,nodi[j],i);
+                printf("Errore , node[%d]=%d invece che %d\n",j,nodi[j],i);
                 return 1;
             }
         }
