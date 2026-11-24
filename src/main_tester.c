@@ -103,6 +103,15 @@ int main(void) {
             printf("Errore nell'allocazione mista , all'indice %d con size = %zu\n\n",i,sz);
         }
         memset(mixed[i],i,sz);
+        if(i%2==0){
+            if(i==0 || i==1 || i==128 || i==255) {
+                printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[1] : %u | byte[255] : %u | byte[499] : %u\n",i,(void*)nodi[i],(unsigned char)nodi[i][0],(unsigned char)nodi[i][1],(unsigned char)nodi[i][255],(unsigned char)nodi[i][499]);
+            }
+        }else{
+            if(i==0 || i==1 || i==2048 || i==4095) {
+                printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[1] : %u | byte[2048] : %u | byte[4096] : %u\n",i,(void*)nodi[i],(unsigned char)nodi[i][0],(unsigned char)nodi[i][1],(unsigned char)nodi[i][2048],(unsigned char)nodi[i][4096]);
+            }
+        }
     }
 
     for(int i=0; i< 50; i++){
