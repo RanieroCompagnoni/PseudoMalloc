@@ -110,10 +110,13 @@ int main(void) {
             printf("Errore nell'allocazione mista , all'indice %d con size = %zu\n\n",i,sz);
         }
         memset(mixed[i],i,sz);
-        if(i%2==0 && i%5==0){
-            printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[1] : %u | byte[128] : %u | byte[255] : %u\n",i,(void*)nodi[i],(unsigned char)nodi[i][0],(unsigned char)nodi[i][1],(unsigned char)nodi[i][128],(unsigned char)nodi[i][255]);
+
+        unsigned char *ptr = (unsigned char *)mixed[i];
+
+        if(i%2==0){
+            printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[1] : %u | byte[128] : %u | byte[255] : %u\n",i, (void *)ptr, ptr[0], ptr[1], ptr[128], ptr[255]);
         }else{
-            printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[1] : %u | byte[2048] : %u | byte[4096] : %u\n",i,(void*)nodi[i],(unsigned char)nodi[i][0],(unsigned char)nodi[i][1],(unsigned char)nodi[i][2048],(unsigned char)nodi[i][4096]);
+            printf("Blocco[%d] -> addr: %p | byte[0]: %u | byte[1] : %u | byte[2048] : %u | byte[4096] : %u\n",i, (void *)ptr, ptr[0], ptr[1], ptr[2048], ptr[4095]);
         }
     }
 
